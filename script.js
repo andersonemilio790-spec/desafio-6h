@@ -1,8 +1,6 @@
-const PIN_ADMIN = "2026"; // Tua senha secreta para desbloquear após veres o comprovativo
+const PIN_ADMIN = "2026";
 const TEMPO_PADRAO = 6 * 3600;
 const VALOR_PREMIO = 5000;
-const VALOR_MULTA = 2500;
-const VALOR_DESBLOQUEIO = 5000;
 
 let estado = JSON.parse(localStorage.getItem('desafio6h_dados')) || {
     tempoRestante: TEMPO_PADRAO,
@@ -42,40 +40,27 @@ function atualizarInterface() {
     lista.innerHTML = '';
 
     let ativos = 0;
-    let totalArrecadado = 0;
-    let premios = 0;
 
     estado.jogadores.forEach((jogador, index) => {
         if (jogador.status === 'ativo') {
             ativos++;
-            if (estado.tempoRestante === 0) {
-                premios += VALOR_PREMIO;
-            }
-        } else if (jogador.status === 'mexeu') {
-            totalArrecadado += VALOR_MULTA;
-        } else if (jogador.status === 'banido') {
-            totalArrecadado += VALOR_DESBLOQUEIO;
         }
 
         const li = document.createElement('li');
-        if (jogador.status === 'mexeu') li.className = 'eliminado';
         if (jogador.status === 'banido') li.className = 'banido';
 
         let textoStatus = '';
         if (jogador.status === 'ativo') {
             textoStatus = estado.tempoRestante === 0 
-                ? `🏆 Vencedor! Recebe ${VALOR_PREMIO.toLocaleString('pt-PT')} Kz` 
-                : '🟢 Resistindo sem telemóvel';
-        } else if (jogador.status === 'mexeu') {
-            textoStatus = `❌ Mexeu às ${jogador.horaFalha} (Paga ${VALOR_MULTA.toLocaleString('pt-PT')} Kz)`;
+                ? `🏆 VENCEDOR! Ganhou ${VALOR_PREMIO.toLocaleString('pt-PT')} Kz` 
+                : `🟢 A disputar o prémio de ${VALOR_PREMIO.toLocaleString('pt-PT')} Kz`;
         } else if (jogador.status === 'banido') {
-            textoStatus = `🔒 Bloqueado (${jogador.motivo}) às ${jogador.horaFalha} (Desbloqueio: ${VALOR_DESBLOQUEIO.toLocaleString('pt-PT')} Kz)`;
+            textoStatus = `🔒 Eliminado (${jogador.motivo}) às ${jogador.horaFalha}`;
         }
 
         const botoesAcao = (jogador.status === 'ativo' && estado.tempoRestante > 0) 
             ? `<div class="acoes-jogador">
-                <button class="btn-mexeu" onclick="registrarFalha(${index})">Mexeu!</button>
-                <button class="btn-regra" onclick="registrarInfracao(${index})" title="Bloquear por quebra de regra">🔒 Bloquear</button>
+                <button class="btn-regra" onclick="registrarInfracao(${index})">🔒 Mexeu / Bloquear</button>
                </div>` 
             : '';
 
@@ -90,8 +75,6 @@ function atualizarInterface() {
     });
 
     document.getElementById('total-ativos').textContent = ativos;
-    document.getElementById('total-multas').textContent = totalArrecadado.toLocaleString('pt-PT') + ' Kz';
-    document.getElementById('total-premios').textContent = premios.toLocaleString('pt-PT') + ' Kz';
 }
 
 function adicionarJogador() {
@@ -128,7 +111,7 @@ function iniciarCronometro() {
             estado.emAndamento = false;
             salvarEstado();
             atualizarInterface();
-            alert('🎉 TEMPO ESGOTADO! Todos os que resistiram ganharam 5.000 Kz!');
+            alert('🎉 TEMPO ESGOTADO! Os vencedores ganharam 5.000 Kz!');
         }
     }, 1000);
 }
@@ -154,21 +137,6 @@ function ativarModoTeste() {
     iniciarDesafio();
 }
 
-function registrarFalha(index) {
-    if (!estado.emAndamento) {
-        alert('Inicia o cronómetro primeiro!');
-        return;
-    }
-
-    const jogador = estado.jogadores[index];
-    if (confirm(`Confirmas que ${jogador.nome} mexeu no telemóvel e vai pagar 2.500 Kz?`)) {
-        jogador.status = 'mexeu';
-        jogador.horaFalha = formatarTempo(estado.tempoRestante);
-        salvarEstado();
-        atualizarInterface();
-    }
-}
-
 function registrarInfracao(index) {
     if (!estado.emAndamento) {
         alert('Inicia o cronómetro primeiro!');
@@ -176,17 +144,13 @@ function registrarInfracao(index) {
     }
 
     const jogador = estado.jogadores[index];
-    const motivo = prompt(`Qual regra ${jogador.nome} quebrou? (Ex: Saiu da tela, recusou pagar, batota)`);
+    jogador.status = 'banido';
+    jogador.motivo = 'Mexeu no telemóvel / Quebrou a regra';
+    jogador.horaFalha = formatarTempo(estado.tempoRestante);
     
-    if (motivo !== null && motivo.trim() !== '') {
-        jogador.status = 'banido';
-        jogador.motivo = motivo.trim();
-        jogador.horaFalha = formatarTempo(estado.tempoRestante);
-        
-        salvarEstado();
-        atualizarInterface();
-        abrirTelaPenalizacao(jogador.nome, jogador.motivo);
-    }
+    salvarEstado();
+    atualizarInterface();
+    abrirTelaPenalizacao(jogador.nome, jogador.motivo);
 }
 
 function abrirTelaPenalizacao(nome, motivo) {
@@ -234,7 +198,6 @@ function reiniciarTudo() {
     }
 }
 
-// DETEÇÃO AUTOMÁTICA SE SAIR DO NAVEGADOR OU BLOQUEAR O TELEMÓVEL
 document.addEventListener("visibilitychange", () => {
     if (document.hidden && estado.emAndamento && !estado.bloqueioAtivo) {
         estado.emAndamento = false;
@@ -247,7 +210,6 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
-// Recupera o estado caso a página seja atualizada
 if (estado.emAndamento && estado.tempoRestante > 0) {
     iniciarCronometro();
 }

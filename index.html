@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio 6H - Sem Telemóvel</title>
+    <title>Desafio 6H - Prémio 5.000 Kz</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,9 +11,7 @@
         <header>
             <h1>📵 DESAFIO 6H</h1>
             <p class="regras">
-                Resistir 6h: <span class="ganho">+5.000 Kz</span> | 
-                Mexer: <span class="perda">-2.500 Kz</span><br>
-                Desbloqueio por Quebra de Regra: <span class="infracao">5.000 Kz</span>
+                Fica 6 horas sem mexer no telemóvel e ganha <span class="ganho">5.000 Kz</span>!
             </p>
         </header>
 
@@ -31,18 +29,14 @@
             <button onclick="adicionarJogador()">+ Adicionar</button>
         </section>
 
-        <section class="resumo-financeiro">
+        <section class="resumo-financeiro" style="grid-template-columns: repeat(2, 1fr);">
             <div class="card-stat">
                 <span>Em Prova</span>
                 <strong id="total-ativos">0</strong>
             </div>
             <div class="card-stat">
-                <span>Multas + Desbloqueios</span>
-                <strong id="total-multas">0</strong>
-            </div>
-            <div class="card-stat">
-                <span>Prémios a Pagar</span>
-                <strong id="total-premios">0</strong>
+                <span>Prémio por Vencedor</span>
+                <strong class="ganho">5.000 Kz</strong>
             </div>
         </section>
 
