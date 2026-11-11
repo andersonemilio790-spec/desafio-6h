@@ -5,7 +5,7 @@ const VALOR_PREMIO = 5000;
 let estado = JSON.parse(localStorage.getItem('desafio6h_dados')) || {
     tempoRestante: TEMPO_PADRAO,
     emAndamento: false,
-    jogadores: [],
+    jogadores: new Array(),
     bloqueioAtivo: null
 };
 
@@ -190,7 +190,7 @@ function reiniciarTudo() {
         estado = {
             tempoRestante: TEMPO_PADRAO,
             emAndamento: false,
-            jogadores: [],
+            jogadores: new Array(),
             bloqueioAtivo: null
         };
         salvarEstado();
