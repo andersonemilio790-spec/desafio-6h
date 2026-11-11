@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio 6H - Sem Telemóvel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📵 DESAFIO 6H</h1>
+            <p class="regras">
+                Resistir 6h: <span class="ganho">+5.000 Kz</span> | 
+                Mexer: <span class="perda">-2.500 Kz</span><br>
+                Quebrar regras / Batota: <span class="infracao">-5.000 Kz (Bloqueio)</span>
+            </p>
+        </header>
+
+        <section class="painel-tempo">
+            <div id="cronometro">06:00:00</div>
+            <div class="botoes-tempo">
+                <button id="btn-iniciar" onclick="iniciarDesafio()">▶ Iniciar</button>
+                <button id="btn-teste" onclick="ativarModoTeste()" class="btn-secundario">⚡ Teste (10s)</button>
+                <button id="btn-reset" onclick="reiniciarTudo()" class="btn-perigo">🔄 Reiniciar</button>
+            </div>
+        </section>
+
+        <section class="cadastro">
+            <input type="text" id="input-nome" placeholder="Nome do participante..." onkeypress="if(event.key==='Enter') adicionarJogador()">
+            <button onclick="adicionarJogador()">+ Adicionar</button>
+        </section>
+
+        <section class="resumo-financeiro">
+            <div class="card-stat">
+                <span>Em Prova</span>
+                <strong id="total-ativos">0</strong>
+            </div>
+            <div class="card-stat">
+                <span>Multas + Infrações</span>
+                <strong id="total-multas">0</strong>
+            </div>
+            <div class="card-stat">
+                <span>Prémios a Pagar</span>
+                <strong id="total-premios">0</strong>
+            </div>
+        </section>
+
+        <ul id="lista-jogadores"></ul>
+    </div>
+
+    <!-- ECRÃ PRETO DE PENALIZAÇÃO BLOQUEADO -->
+    <div id="tela-penalizacao" class="tela-preta escondido">
+        <div class="caixa-cobranca">
+            <div class="icone-alerta">🚫</div>
+            <h2>REGRA QUEBRADA!</h2>
+            <p id="texto-infrator" class="destaque-infrator"></p>
+            <p id="motivo-infrator" class="motivo-texto"></p>
+            
+            <div class="valor-divida">
+                <span>VALOR A PAGAR AGORA:</span>
+                <strong>5.000,00 Kz</strong>
+            </div>
+
+            <div class="dados-pagamento">
+                <div class="campo-dado">
+                    <label>IBAN PARA TRANSFERÊNCIA:</label>
+                    <div class="copiar-linha">
+                        <code id="texto-iban">AO06 0055 0000 0518 0413 1015 6</code>
+                        <button onclick="copiarTexto('texto-iban')">Copiar</button>
+                    </div>
+                </div>
+
+                <div class="campo-dado">
+                    <label>ENVIAR COMPROVATIVO PARA O GMAIL:</label>
+                    <div class="copiar-linha">
+                        <code id="texto-gmail">andersonemilio55@gmail.com</code>
+                        <button onclick="copiarTexto('texto-gmail')">Copiar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="desbloqueio-admin">
+                <input type="password" id="input-pin-admin" placeholder="PIN do Administrador..." maxlength="6">
+                <button onclick="desbloquearComPin()" class="btn-desbloquear">🔓 Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

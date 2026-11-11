@@ -1,2 +1,0 @@
-# Desafio 6h
-Projeto em desenvolvimento.
