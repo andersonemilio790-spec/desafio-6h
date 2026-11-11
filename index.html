@@ -13,7 +13,7 @@
             <p class="regras">
                 Resistir 6h: <span class="ganho">+5.000 Kz</span> | 
                 Mexer: <span class="perda">-2.500 Kz</span><br>
-                Quebrar regras / Batota: <span class="infracao">-5.000 Kz (Bloqueio)</span>
+                Desbloqueio por Quebra de Regra: <span class="infracao">5.000 Kz</span>
             </p>
         </header>
 
@@ -37,7 +37,7 @@
                 <strong id="total-ativos">0</strong>
             </div>
             <div class="card-stat">
-                <span>Multas + Infrações</span>
+                <span>Multas + Desbloqueios</span>
                 <strong id="total-multas">0</strong>
             </div>
             <div class="card-stat">
@@ -49,22 +49,22 @@
         <ul id="lista-jogadores"></ul>
     </div>
 
-    <!-- ECRÃ PRETO DE PENALIZAÇÃO BLOQUEADO -->
+    <!-- ECRÃ PRETO DE BLOQUEIO (DESBLOQUEIO = 5.000 KZ) -->
     <div id="tela-penalizacao" class="tela-preta escondido">
         <div class="caixa-cobranca">
-            <div class="icone-alerta">🚫</div>
-            <h2>REGRA QUEBRADA!</h2>
+            <div class="icone-alerta">🔒</div>
+            <h2>SISTEMA BLOQUEADO!</h2>
             <p id="texto-infrator" class="destaque-infrator"></p>
             <p id="motivo-infrator" class="motivo-texto"></p>
             
             <div class="valor-divida">
-                <span>VALOR A PAGAR AGORA:</span>
+                <span>TAXA DE DESBLOQUEIO OBRIGATÓRIA:</span>
                 <strong>5.000,00 Kz</strong>
             </div>
 
             <div class="dados-pagamento">
                 <div class="campo-dado">
-                    <label>IBAN PARA TRANSFERÊNCIA:</label>
+                    <label>TRANSFERIR 5.000 KZ PARA O IBAN:</label>
                     <div class="copiar-linha">
                         <code id="texto-iban">AO06 0055 0000 0518 0413 1015 6</code>
                         <button onclick="copiarTexto('texto-iban')">Copiar</button>
@@ -81,8 +81,8 @@
             </div>
 
             <div class="desbloqueio-admin">
-                <input type="password" id="input-pin-admin" placeholder="PIN do Administrador..." maxlength="6">
-                <button onclick="desbloquearComPin()" class="btn-desbloquear">🔓 Confirmar</button>
+                <input type="password" id="input-pin-admin" placeholder="PIN de Desbloqueio..." maxlength="6">
+                <button onclick="desbloquearComPin()" class="btn-desbloquear">🔓 Desbloquear (5.000 Kz)</button>
             </div>
         </div>
     </div>

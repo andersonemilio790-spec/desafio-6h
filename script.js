@@ -1,8 +1,8 @@
-const PIN_ADMIN = "2026"; // Muda este número para a tua senha secreta
-const TEMPO_PADRAO = 6 * 3600; // 6 horas em segundos
+const PIN_ADMIN = "2026"; // Tua senha secreta para desbloquear após veres o comprovativo
+const TEMPO_PADRAO = 6 * 3600;
 const VALOR_PREMIO = 5000;
 const VALOR_MULTA = 2500;
-const VALOR_INFRACAO = 5000;
+const VALOR_DESBLOQUEIO = 5000;
 
 let estado = JSON.parse(localStorage.getItem('desafio6h_dados')) || {
     tempoRestante: TEMPO_PADRAO,
@@ -22,6 +22,15 @@ function formatarTempo(segundos) {
     const m = Math.floor((segundos % 3600) / 60);
     const s = segundos % 60;
     return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+}
+
+function ativarEcraInteiro() {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(() => {});
+    } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+    }
 }
 
 function atualizarInterface() {
@@ -45,7 +54,7 @@ function atualizarInterface() {
         } else if (jogador.status === 'mexeu') {
             totalArrecadado += VALOR_MULTA;
         } else if (jogador.status === 'banido') {
-            totalArrecadado += VALOR_INFRACAO;
+            totalArrecadado += VALOR_DESBLOQUEIO;
         }
 
         const li = document.createElement('li');
@@ -55,18 +64,18 @@ function atualizarInterface() {
         let textoStatus = '';
         if (jogador.status === 'ativo') {
             textoStatus = estado.tempoRestante === 0 
-                ? `🏆 Vencedor! Recebe ${VALOR_PREMIO.toLocaleString('pt-PT')}` 
+                ? `🏆 Vencedor! Recebe ${VALOR_PREMIO.toLocaleString('pt-PT')} Kz` 
                 : '🟢 Resistindo sem telemóvel';
         } else if (jogador.status === 'mexeu') {
-            textoStatus = `❌ Mexeu às ${jogador.horaFalha} (Paga ${VALOR_MULTA.toLocaleString('pt-PT')})`;
+            textoStatus = `❌ Mexeu às ${jogador.horaFalha} (Paga ${VALOR_MULTA.toLocaleString('pt-PT')} Kz)`;
         } else if (jogador.status === 'banido') {
-            textoStatus = `🚫 Quebrou regra (${jogador.motivo}) às ${jogador.horaFalha} (Paga ${VALOR_INFRACAO.toLocaleString('pt-PT')})`;
+            textoStatus = `🔒 Bloqueado (${jogador.motivo}) às ${jogador.horaFalha} (Desbloqueio: ${VALOR_DESBLOQUEIO.toLocaleString('pt-PT')} Kz)`;
         }
 
         const botoesAcao = (jogador.status === 'ativo' && estado.tempoRestante > 0) 
             ? `<div class="acoes-jogador">
                 <button class="btn-mexeu" onclick="registrarFalha(${index})">Mexeu!</button>
-                <button class="btn-regra" onclick="registrarInfracao(${index})" title="Quebrou as regras">🚫 Regra</button>
+                <button class="btn-regra" onclick="registrarInfracao(${index})" title="Bloquear por quebra de regra">🔒 Bloquear</button>
                </div>` 
             : '';
 
@@ -81,8 +90,8 @@ function atualizarInterface() {
     });
 
     document.getElementById('total-ativos').textContent = ativos;
-    document.getElementById('total-multas').textContent = totalArrecadado.toLocaleString('pt-PT');
-    document.getElementById('total-premios').textContent = premios.toLocaleString('pt-PT');
+    document.getElementById('total-multas').textContent = totalArrecadado.toLocaleString('pt-PT') + ' Kz';
+    document.getElementById('total-premios').textContent = premios.toLocaleString('pt-PT') + ' Kz';
 }
 
 function adicionarJogador() {
@@ -119,7 +128,7 @@ function iniciarCronometro() {
             estado.emAndamento = false;
             salvarEstado();
             atualizarInterface();
-            alert('🎉 TEMPO ESGOTADO! Todos os que resistiram ganharam 5.000!');
+            alert('🎉 TEMPO ESGOTADO! Todos os que resistiram ganharam 5.000 Kz!');
         }
     }, 1000);
 }
@@ -129,6 +138,7 @@ function iniciarDesafio() {
         alert('Adiciona pelo menos um participante antes de iniciar!');
         return;
     }
+    ativarEcraInteiro();
     estado.emAndamento = true;
     salvarEstado();
     atualizarInterface();
@@ -151,7 +161,7 @@ function registrarFalha(index) {
     }
 
     const jogador = estado.jogadores[index];
-    if (confirm(`Confirmas que ${jogador.nome} mexeu no telemóvel e vai pagar 2.500?`)) {
+    if (confirm(`Confirmas que ${jogador.nome} mexeu no telemóvel e vai pagar 2.500 Kz?`)) {
         jogador.status = 'mexeu';
         jogador.horaFalha = formatarTempo(estado.tempoRestante);
         salvarEstado();
@@ -166,7 +176,7 @@ function registrarInfracao(index) {
     }
 
     const jogador = estado.jogadores[index];
-    const motivo = prompt(`Qual regra ${jogador.nome} quebrou? (Ex: Mexeu às escondidas, recusou pagar, etc.)`);
+    const motivo = prompt(`Qual regra ${jogador.nome} quebrou? (Ex: Saiu da tela, recusou pagar, batota)`);
     
     if (motivo !== null && motivo.trim() !== '') {
         jogador.status = 'banido';
@@ -196,9 +206,9 @@ function desbloquearComPin() {
         estado.bloqueioAtivo = null;
         salvarEstado();
         document.getElementById('tela-penalizacao').classList.add('escondido');
-        alert('✅ Pagamento confirmado! Ecrã desbloqueado.');
+        alert('✅ Pagamento de 5.000 Kz confirmado! Ecrã desbloqueado.');
     } else {
-        alert('❌ PIN incorreto! Envia o comprovativo para o Gmail primeiro.');
+        alert('❌ PIN incorreto! Transfere os 5.000 Kz e envia o comprovativo para andersonemilio55@gmail.com.');
         document.getElementById('input-pin-admin').value = '';
     }
 }
@@ -223,6 +233,19 @@ function reiniciarTudo() {
         atualizarInterface();
     }
 }
+
+// DETEÇÃO AUTOMÁTICA SE SAIR DO NAVEGADOR OU BLOQUEAR O TELEMÓVEL
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden && estado.emAndamento && !estado.bloqueioAtivo) {
+        estado.emAndamento = false;
+        clearInterval(intervalo);
+        
+        abrirTelaPenalizacao(
+            "Participante", 
+            "Saiu da página ou bloqueou o ecrã durante o desafio!"
+        );
+    }
+});
 
 // Recupera o estado caso a página seja atualizada
 if (estado.emAndamento && estado.tempoRestante > 0) {
