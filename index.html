@@ -3,42 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio 6H - Prémio 5.000 Kz</title>
+    <title>Desafio 6H - Grande Prémio iPhone 14</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📵 DESAFIO 6H</h1>
-            <p class="regras">
-                Fica 6 horas sem mexer no telemóvel e ganha <span class="ganho">5.000 Kz</span>!
-            </p>
+            <div class="badge-oficial">TORNEIO OFICIAL • EDIÇÃO ESPECIAL</div>
+            <h1>📵 DESAFIO 6 HORAS</h1>
+            <p class="regras">Resiste 6 horas sem tocar ou sair desta tela para conquistar o grande prémio.</p>
         </header>
 
+        <!-- CARTÃO DO PRÉMIO IPHONE 14 -->
+        <section class="card-premio">
+            <div class="premio-img-box">
+                <img src="https://cdn-apple.com" alt="iPhone 14 Prémio Oficial">
+            </div>
+            <div class="premio-info">
+                <span class="tag-premio">🏆 GRANDE PRÉMIO</span>
+                <h2>Apple iPhone 14</h2>
+                <p>128GB • Novo na Caixa</p>
+            </div>
+        </section>
+
+        <!-- PAINEL DE CONTAGEM PROFISSIONAL -->
         <section class="painel-tempo">
+            <div class="label-tempo">TEMPO RESTANTE DO DESAFIO</div>
             <div id="cronometro">06:00:00</div>
+            <div class="barra-progresso-fundo">
+                <div id="barra-progresso" class="barra-progresso-fill"></div>
+            </div>
             <div class="botoes-tempo">
-                <button id="btn-iniciar" onclick="iniciarDesafio()">▶ Iniciar</button>
+                <button id="btn-iniciar" onclick="iniciarDesafio()" class="btn-primario">▶ Iniciar Desafio</button>
                 <button id="btn-teste" onclick="ativarModoTeste()" class="btn-secundario">⚡ Teste (10s)</button>
                 <button id="btn-reset" onclick="reiniciarTudo()" class="btn-perigo">🔄 Reiniciar</button>
             </div>
         </section>
 
+        <!-- REGISTO DE PARTICIPANTES -->
         <section class="cadastro">
             <input type="text" id="input-nome" placeholder="Nome do participante..." onkeypress="if(event.key==='Enter') adicionarJogador()">
-            <button onclick="adicionarJogador()">+ Adicionar</button>
+            <button onclick="adicionarJogador()" class="btn-primario">+ Entrar</button>
         </section>
 
-        <section class="resumo-financeiro" style="grid-template-columns: repeat(2, 1fr);">
-            <div class="card-stat">
-                <span>Em Prova</span>
-                <strong id="total-ativos">0</strong>
-            </div>
-            <div class="card-stat">
-                <span>Prémio por Vencedor</span>
-                <strong class="ganho">5.000 Kz</strong>
-            </div>
-        </section>
+        <div class="cabecalho-lista">
+            <span>PARTICIPANTES NA DISPUTA</span>
+            <span>EM PROVA: <strong id="total-ativos">0</strong></span>
+        </div>
 
         <ul id="lista-jogadores"></ul>
     </div>
@@ -75,8 +86,8 @@
             </div>
 
             <div class="desbloqueio-admin">
-                <input type="password" id="input-pin-admin" placeholder="PIN de Desbloqueio..." maxlength="6">
-                <button onclick="desbloquearComPin()" class="btn-desbloquear">🔓 Desbloquear (5.000 Kz)</button>
+                <input type="password" id="input-pin-admin" placeholder="PIN do Administrador..." maxlength="6">
+                <button onclick="desbloquearComPin()" class="btn-desbloquear">🔓 Desbloquear</button>
             </div>
         </div>
     </div>
