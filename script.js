@@ -36,8 +36,8 @@ function ativarEcraInteiro() {
     }
 }
 
-// FUNÇÕES DO MENU SECRETO DE ADMINISTRADOR
 function abrirMenuAdmin() {
+    if (estado.bloqueioAtivo) return;
     const pin = prompt("Insere o PIN de Administrador para aceder aos controlos:");
     if (pin === PIN_ADMIN) {
         document.getElementById('controles-admin').classList.remove('escondido');
@@ -84,7 +84,7 @@ function atualizarInterface() {
             textoStatus = `🔒 Bloqueado (${jogador.motivo}) às ${jogador.horaFalha}`;
         }
 
-        const botoesAcao = (jogador.status === 'ativo' && estado.tempoRestante > 0) 
+        const botoesAcao = (jogador.status === 'ativo' && estado.tempoRestante > 0 && !estado.bloqueioAtivo) 
             ? `<div class="acoes-jogador">
                 <button class="btn-regra" onclick="registrarInfracao(${index})">🔒 Mexeu</button>
                </div>` 
@@ -158,6 +158,9 @@ function registrarInfracao(index) {
     jogador.motivo = 'Mexeu no telemóvel / Quebrou a regra';
     jogador.horaFalha = formatarTempo(estado.tempoRestante);
     
+    estado.emAndamento = false;
+    clearInterval(intervalo);
+    
     salvarEstado();
     atualizarInterface();
     abrirTelaPenalizacao(jogador.nome, jogador.motivo);
@@ -167,6 +170,7 @@ function abrirTelaPenalizacao(nome, motivo) {
     estado.bloqueioAtivo = { nome: nome, motivo: motivo };
     salvarEstado();
 
+    document.body.classList.add('bloqueado-ativo');
     document.getElementById('texto-infrator').textContent = `Infrator: ${nome}`;
     document.getElementById('motivo-infrator').textContent = `Motivo: ${motivo}`;
     document.getElementById('input-pin-admin').value = '';
@@ -179,7 +183,9 @@ function desbloquearComPin() {
     if (pinDigitado === PIN_ADMIN) {
         estado.bloqueioAtivo = null;
         salvarEstado();
+        document.body.classList.remove('bloqueado-ativo');
         document.getElementById('tela-penalizacao').classList.add('escondido');
+        atualizarInterface();
         alert('✅ Pagamento de 5.000 Kz confirmado! Ecrã desbloqueado.');
     } else {
         alert('❌ PIN incorreto! Transfere os 5.000 Kz e envia o comprovativo para andersonemilio55@gmail.com.');
@@ -209,6 +215,8 @@ function reiniciarTudo() {
             }),
             bloqueioAtivo: null
         };
+        document.body.classList.remove('bloqueado-ativo');
+        document.getElementById('tela-penalizacao').classList.add('escondido');
         salvarEstado();
         fecharMenuAdmin();
         atualizarInterface();
@@ -216,6 +224,7 @@ function reiniciarTudo() {
     }
 }
 
+// VIGILÂNCIA 1: MUDAR DE SEPARADOR, MINIMIZAR OU BLOQUEAR ECRÃ
 document.addEventListener("visibilitychange", () => {
     if (document.hidden && estado.emAndamento && !estado.bloqueioAtivo) {
         estado.emAndamento = false;
@@ -228,12 +237,26 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
+// VIGILÂNCIA 2: FECHAR O NAVEGADOR OU SEPARADOR
+window.addEventListener("pagehide", () => {
+    if (estado.emAndamento && !estado.bloqueioAtivo) {
+        estado.emAndamento = false;
+        estado.bloqueioAtivo = {
+            nome: "Participante Oficial",
+            motivo: "Fechou o navegador ou saiu do link durante o desafio!"
+        };
+        salvarEstado();
+    }
+});
+
+// ATIVA ECRÃ INTEIRO NO PRIMEIRO TOQUE
 document.addEventListener("click", () => {
-    if (estado.emAndamento && !document.fullscreenElement) {
+    if (estado.emAndamento && !document.fullscreenElement && !estado.bloqueioAtivo) {
         ativarEcraInteiro();
     }
 }, { once: true });
 
+// RECUPERA BLOQUEIO OU CONTINUA CONTAGEM AO ABRIR O LINK
 if (estado.bloqueioAtivo) {
     abrirTelaPenalizacao(estado.bloqueioAtivo.nome, estado.bloqueioAtivo.motivo);
 } else if (estado.emAndamento && estado.tempoRestante > 0) {
@@ -242,29 +265,3 @@ if (estado.bloqueioAtivo) {
 }
 
 atualizarInterface();
-
-function abrirTelaPenalizacao(nome, motivo) {
-    estado.bloqueioAtivo = { nome: nome, motivo: motivo };
-    salvarEstado();
-
-    document.body.classList.add('bloqueado-ativo');
-    document.getElementById('texto-infrator').textContent = `Infrator: ${nome}`;
-    document.getElementById('motivo-infrator').textContent = `Motivo: ${motivo}`;
-    document.getElementById('input-pin-admin').value = '';
-    document.getElementById('tela-penalizacao').classList.remove('escondido');
-}
-
-function desbloquearComPin() {
-    const pinDigitado = document.getElementById('input-pin-admin').value;
-    
-    if (pinDigitado === PIN_ADMIN) {
-        estado.bloqueioAtivo = null;
-        salvarEstado();
-        document.body.classList.remove('bloqueado-ativo');
-        document.getElementById('tela-penalizacao').classList.add('escondido');
-        alert('✅ Pagamento de 5.000 Kz confirmado! Ecrã desbloqueado.');
-    } else {
-        alert('❌ PIN incorreto! Transfere os 5.000 Kz e envia o comprovativo para andersonemilio55@gmail.com.');
-        document.getElementById('input-pin-admin').value = '';
-    }
-}
