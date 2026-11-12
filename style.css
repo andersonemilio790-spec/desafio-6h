@@ -409,3 +409,148 @@ li.banido {
     color: #ffffff;
     padding: 11px 16px;
 }
+
+/* BLOQUEIO EM METADE DO ECRÃ (50% PRETO FIXO) */
+.escondido {
+    display: none !important;
+}
+
+.tela-preta {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 55vh; /* Ocupa mais de metade do ecrã em baixo */
+    background-color: #000000;
+    color: #ffffff;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    border-top: 3px solid #ef4444;
+    box-shadow: 0 -15px 40px rgba(239, 68, 68, 0.45);
+    overflow-y: auto;
+}
+
+/* Impede qualquer clique na metade de cima enquanto estiver bloqueado */
+body.bloqueado-ativo .container {
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.55;
+    padding-bottom: 58vh;
+}
+
+.caixa-cobranca {
+    max-width: 460px;
+    width: 100%;
+    text-align: center;
+}
+
+.icone-alerta {
+    font-size: 2rem;
+    margin-bottom: 4px;
+}
+
+.caixa-cobranca h2 {
+    color: #ef4444;
+    font-size: 1.35rem;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.destaque-infrator {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #f8fafc;
+}
+
+.motivo-texto {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    margin-bottom: 12px;
+}
+
+.valor-divida {
+    background: #18181b;
+    border: 1px dashed #ef4444;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+}
+
+.valor-divida span {
+    display: block;
+    font-size: 0.7rem;
+    color: #a1a1aa;
+}
+
+.valor-divida strong {
+    font-size: 1.5rem;
+    color: #ef4444;
+    font-weight: 900;
+}
+
+.dados-pagamento {
+    text-align: left;
+    margin-bottom: 12px;
+}
+
+.campo-dado {
+    margin-bottom: 8px;
+}
+
+.campo-dado label {
+    display: block;
+    font-size: 0.68rem;
+    color: #a1a1aa;
+    margin-bottom: 3px;
+    font-weight: bold;
+}
+
+.copiar-linha {
+    display: flex;
+    gap: 6px;
+    background: #18181b;
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid #27272a;
+    align-items: center;
+}
+
+.copiar-linha code {
+    flex: 1;
+    color: #4ade80;
+    font-size: 0.82rem;
+    word-break: break-all;
+}
+
+.copiar-linha button {
+    background: #27272a;
+    color: #fff;
+    padding: 5px 10px;
+    font-size: 0.72rem;
+}
+
+.desbloqueio-admin {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    border-top: 1px solid #27272a;
+    padding-top: 10px;
+}
+
+.desbloqueio-admin input {
+    text-align: center;
+    letter-spacing: 3px;
+    background: #18181b;
+    padding: 8px;
+    font-size: 0.85rem;
+}
+
+.btn-desbloquear {
+    background: #ef4444;
+    color: #ffffff;
+    padding: 8px 14px;
+    font-size: 0.8rem;
+}

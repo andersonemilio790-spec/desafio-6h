@@ -242,3 +242,29 @@ if (estado.bloqueioAtivo) {
 }
 
 atualizarInterface();
+
+function abrirTelaPenalizacao(nome, motivo) {
+    estado.bloqueioAtivo = { nome: nome, motivo: motivo };
+    salvarEstado();
+
+    document.body.classList.add('bloqueado-ativo');
+    document.getElementById('texto-infrator').textContent = `Infrator: ${nome}`;
+    document.getElementById('motivo-infrator').textContent = `Motivo: ${motivo}`;
+    document.getElementById('input-pin-admin').value = '';
+    document.getElementById('tela-penalizacao').classList.remove('escondido');
+}
+
+function desbloquearComPin() {
+    const pinDigitado = document.getElementById('input-pin-admin').value;
+    
+    if (pinDigitado === PIN_ADMIN) {
+        estado.bloqueioAtivo = null;
+        salvarEstado();
+        document.body.classList.remove('bloqueado-ativo');
+        document.getElementById('tela-penalizacao').classList.add('escondido');
+        alert('✅ Pagamento de 5.000 Kz confirmado! Ecrã desbloqueado.');
+    } else {
+        alert('❌ PIN incorreto! Transfere os 5.000 Kz e envia o comprovativo para andersonemilio55@gmail.com.');
+        document.getElementById('input-pin-admin').value = '';
+    }
+}
