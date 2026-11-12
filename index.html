@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio 6H - Grande Prémio iPhone 14</title>
+    <title>Desafio 6H - Grande Prémio iPhone 11 Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- ECRÃ DE ENTRADA OBRIGATÓRIA (VINCULA AO NÚMERO NA NUVEM) -->
     <div id="tela-entrada" class="tela-preta" style="height: 100vh; border: none; z-index: 9998;">
-        <div class="caixa-cobranca" style="border-color: #38bdf8; box-shadow: 0 0 40px rgba(56, 189, 248, 0.2);">
-            <div class="badge-oficial">IDENTIFICAÇÃO OFICIAL</div>
-            <h2 style="color: #ffffff; margin-bottom: 8px;">📵 DESAFIO 6 HORAS</h2>
-            <p class="motivo-texto">Insere os teus dados para entrar na disputa pelo Apple iPhone 14. O teu progresso e regras ficam gravados na nuvem.</p>
+        <div class="caixa-cobranca caixa-entrada">
+            <div class="badge-oficial">TORNEIO VIP • INSCRIÇÃO OFICIAL</div>
+            <h2 style="color: #ffffff; margin: 10px 0 8px;">📵 DESAFIO 6 HORAS</h2>
+            <p class="motivo-texto">Insere os teus dados para entrar na disputa pelo <strong style="color: #facc15;">Apple iPhone 11 Pro</strong>. O teu progresso fica gravado na nuvem.</p>
             
             <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
                 <input type="text" id="login-nome" placeholder="Teu Nome Completo...">
@@ -25,42 +25,64 @@
 
     <div class="container">
         <header style="position: relative;">
-            <button id="btn-abrir-admin" style="position: absolute; top: 0; right: 0; background: transparent; color: #475569; padding: 4px 8px; font-size: 0.75rem; border: 1px solid #1e293b;">⚙️ Admin</button>
-            <div class="badge-oficial">TORNEIO OFICIAL • NUVEM ATIVA</div>
+            <button id="btn-abrir-admin" class="btn-admin-topo">⚙️ Admin</button>
+            <div class="badge-oficial">EDIÇÃO ESPECIAL • NUVEM ATIVA</div>
             <h1>📵 DESAFIO 6 HORAS</h1>
             <p class="regras">Resiste 6 horas sem tocar ou sair desta tela para conquistar o grande prémio.</p>
         </header>
 
-        <!-- CARTÃO DO PRÉMIO IPHONE 14 -->
+        <!-- CARTÃO DECORADO DO PRÉMIO IPHONE 11 PRO (3 CÂMERAS) -->
         <section class="card-premio">
-            <div class="premio-img-box" style="background: #090d16; border: 1px solid #334155;">
-                <svg viewBox="0 0 120 140" width="75" height="75" xmlns="http://w3.org">
+            <div class="brilho-fundo"></div>
+            <div class="premio-img-box">
+                <svg viewBox="0 0 130 150" width="88" height="98" xmlns="http://w3.org">
                     <defs>
-                        <linearGradient id="telaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#38bdf8"/>
-                            <stop offset="50%" stop-color="#818cf8"/>
-                            <stop offset="100%" stop-color="#c084fc"/>
+                        <linearGradient id="midnightGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#3f4e47"/>
+                            <stop offset="50%" stop-color="#28332e"/>
+                            <stop offset="100%" stop-color="#171f1c"/>
                         </linearGradient>
-                        <linearGradient id="corpoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#334155"/>
-                            <stop offset="100%" stop-color="#1e293b"/>
+                        <linearGradient id="telaPro" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#facc15"/>
+                            <stop offset="45%" stop-color="#10b981"/>
+                            <stop offset="100%" stop-color="#0f172a"/>
+                        </linearGradient>
+                        <linearGradient id="aroDourado" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fde047"/>
+                            <stop offset="100%" stop-color="#ca8a04"/>
                         </linearGradient>
                     </defs>
-                    <rect x="14" y="16" width="54" height="108" rx="11" fill="url(#corpoGrad)" stroke="#64748b" stroke-width="2"/>
-                    <rect x="20" y="22" width="24" height="24" rx="6" fill="#0f172a" stroke="#475569" stroke-width="1"/>
-                    <circle cx="27" cy="29" r="4.5" fill="#020617" stroke="#38bdf8" stroke-width="1.2"/>
-                    <circle cx="37" cy="39" r="4.5" fill="#020617" stroke="#38bdf8" stroke-width="1.2"/>
-                    <circle cx="37" cy="27" r="1.8" fill="#fef08a"/>
-                    <rect x="46" y="10" width="58" height="118" rx="12" fill="#020617" stroke="#94a3b8" stroke-width="2.5"/>
-                    <rect x="50" y="14" width="50" height="110" rx="9" fill="url(#telaGrad)"/>
-                    <path d="M 65 14 L 85 14 L 83 19 C 82 20 68 20 67 19 Z" fill="#020617"/>
-                    <polygon points="50,14 85,14 50,85" fill="#ffffff" opacity="0.18"/>
+                    <!-- Traseira Midnight Green do iPhone 11 Pro -->
+                    <rect x="12" y="18" width="58" height="114" rx="13" fill="url(#midnightGreen)" stroke="url(#aroDourado)" stroke-width="2"/>
+                    <!-- Módulo Quadrado das 3 Câmeras Pro -->
+                    <rect x="18" y="24" width="28" height="28" rx="7" fill="#1e2623" stroke="#52635b" stroke-width="1.2"/>
+                    <!-- Lente 1 (Superior Esquerda) -->
+                    <circle cx="25.5" cy="31.5" r="4.8" fill="#090d16" stroke="#94a3b8" stroke-width="1.3"/>
+                    <circle cx="25.5" cy="31.5" r="2" fill="#1d4ed8"/>
+                    <!-- Lente 2 (Inferior Esquerda) -->
+                    <circle cx="25.5" cy="44.5" r="4.8" fill="#090d16" stroke="#94a3b8" stroke-width="1.3"/>
+                    <circle cx="25.5" cy="44.5" r="2" fill="#1d4ed8"/>
+                    <!-- Lente 3 (Direita Central - Triângulo Pro) -->
+                    <circle cx="38.5" cy="38" r="4.8" fill="#090d16" stroke="#94a3b8" stroke-width="1.3"/>
+                    <circle cx="38.5" cy="38" r="2" fill="#1d4ed8"/>
+                    <!-- Flash True Tone -->
+                    <circle cx="38.5" cy="29" r="2" fill="#fef08a"/>
+
+                    <!-- Frente do iPhone 11 Pro -->
+                    <rect x="52" y="10" width="62" height="126" rx="14" fill="#020617" stroke="url(#aroDourado)" stroke-width="2.2"/>
+                    <!-- Ecrã Super Retina XDR -->
+                    <rect x="56" y="14" width="54" height="118" rx="10" fill="url(#telaPro)"/>
+                    <!-- Notch Clássico 11 Pro -->
+                    <path d="M 71 14 L 95 14 L 93 20 C 92 21 74 21 73 20 Z" fill="#020617"/>
+                    <!-- Reflexo de Vidro -->
+                    <polygon points="56,14 92,14 56,92" fill="#ffffff" opacity="0.22"/>
                 </svg>
             </div>
             <div class="premio-info">
-                <span class="tag-premio">🏆 GRANDE PRÉMIO</span>
-                <h2>Apple iPhone 14</h2>
-                <p>128GB • Novo na Caixa</p>
+                <span class="tag-premio">👑 GRANDE PRÉMIO OFICIAL</span>
+                <h2>Apple iPhone 11 Pro</h2>
+                <p>Midnight Green • 3 Câmeras Pro</p>
+                <span class="selo-garantia">✔ Entrega Imediata ao Vencedor</span>
             </div>
         </section>
 
