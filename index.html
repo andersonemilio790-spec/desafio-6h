@@ -8,13 +8,14 @@
 </head>
 <body>
     <div class="container">
-        <header>
+        <header style="position: relative;">
+            <button onclick="abrirMenuAdmin()" style="position: absolute; top: 0; right: 0; background: transparent; color: #475569; padding: 4px 8px; font-size: 0.75rem; border: 1px solid #1e293b;" title="Acesso Administrador">⚙️ Admin</button>
             <div class="badge-oficial">TORNEIO OFICIAL • EDIÇÃO ESPECIAL</div>
             <h1>📵 DESAFIO 6 HORAS</h1>
             <p class="regras">Resiste 6 horas sem tocar ou sair desta tela para conquistar o grande prémio.</p>
         </header>
 
-        <!-- CARTÃO DO PRÉMIO IPHONE 14 (IMAGEM EMBUTIDA) -->
+        <!-- CARTÃO DO PRÉMIO IPHONE 14 -->
         <section class="card-premio">
             <div class="premio-img-box" style="background: #090d16; border: 1px solid #334155;">
                 <svg viewBox="0 0 120 140" width="75" height="75" xmlns="http://w3.org">
@@ -29,20 +30,14 @@
                             <stop offset="100%" stop-color="#1e293b"/>
                         </linearGradient>
                     </defs>
-                    <!-- Traseira do iPhone 14 -->
                     <rect x="14" y="16" width="54" height="108" rx="11" fill="url(#corpoGrad)" stroke="#64748b" stroke-width="2"/>
-                    <!-- Módulo de Câmeras Duplas -->
                     <rect x="20" y="22" width="24" height="24" rx="6" fill="#0f172a" stroke="#475569" stroke-width="1"/>
                     <circle cx="27" cy="29" r="4.5" fill="#020617" stroke="#38bdf8" stroke-width="1.2"/>
                     <circle cx="37" cy="39" r="4.5" fill="#020617" stroke="#38bdf8" stroke-width="1.2"/>
                     <circle cx="37" cy="27" r="1.8" fill="#fef08a"/>
-                    <!-- Frente do iPhone 14 -->
                     <rect x="46" y="10" width="58" height="118" rx="12" fill="#020617" stroke="#94a3b8" stroke-width="2.5"/>
-                    <!-- Ecrã Super Retina -->
                     <rect x="50" y="14" width="50" height="110" rx="9" fill="url(#telaGrad)"/>
-                    <!-- Notch -->
                     <path d="M 65 14 L 85 14 L 83 19 C 82 20 68 20 67 19 Z" fill="#020617"/>
-                    <!-- Brilho no ecrã -->
                     <polygon points="50,14 85,14 50,85" fill="#ffffff" opacity="0.18"/>
                 </svg>
             </div>
@@ -60,15 +55,17 @@
             <div class="barra-progresso-fundo">
                 <div id="barra-progresso" class="barra-progresso-fill"></div>
             </div>
-            <div class="botoes-tempo">
-                <button id="btn-iniciar" onclick="iniciarDesafio()" class="btn-primario">▶ Iniciar Desafio</button>
+            
+            <!-- BOTÕES ESCONDIDOS (SÓ APARECEM COM O PIN ADMIN) -->
+            <div id="controles-admin" class="botoes-tempo escondido" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #334155;">
                 <button id="btn-teste" onclick="ativarModoTeste()" class="btn-secundario">⚡ Teste (10s)</button>
-                <button id="btn-reset" onclick="reiniciarTudo()" class="btn-perigo">🔄 Reiniciar</button>
+                <button id="btn-reset" onclick="reiniciarTudo()" class="btn-perigo">🔄 Reiniciar 6H</button>
+                <button onclick="fecharMenuAdmin()" class="btn-secundario">✖ Fechar</button>
             </div>
         </section>
 
-        <!-- REGISTO DE PARTICIPANTES -->
-        <section class="cadastro">
+        <!-- REGISTO DE PARTICIPANTES (TAMBÉM PROTEGIDO NO PAINEL ADMIN) -->
+        <section id="cadastro-admin" class="cadastro escondido">
             <input type="text" id="input-nome" placeholder="Nome do participante..." onkeypress="if(event.key==='Enter') adicionarJogador()">
             <button onclick="adicionarJogador()" class="btn-primario">+ Entrar</button>
         </section>

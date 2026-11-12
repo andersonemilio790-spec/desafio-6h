@@ -36,10 +36,24 @@ function ativarEcraInteiro() {
     }
 }
 
+// FUNÇÕES DO MENU SECRETO DE ADMINISTRADOR
+function abrirMenuAdmin() {
+    const pin = prompt("Insere o PIN de Administrador para aceder aos controlos:");
+    if (pin === PIN_ADMIN) {
+        document.getElementById('controles-admin').classList.remove('escondido');
+        document.getElementById('cadastro-admin').classList.remove('escondido');
+    } else if (pin !== null) {
+        alert("❌ Acesso negado! PIN incorreto.");
+    }
+}
+
+function fecharMenuAdmin() {
+    document.getElementById('controles-admin').classList.add('escondido');
+    document.getElementById('cadastro-admin').classList.add('escondido');
+}
+
 function atualizarInterface() {
     document.getElementById('cronometro').textContent = formatarTempo(estado.tempoRestante);
-    document.getElementById('btn-iniciar').disabled = estado.emAndamento || estado.tempoRestante === 0;
-    document.getElementById('btn-teste').disabled = estado.emAndamento || estado.tempoRestante === 0;
 
     const total = estado.tempoTotal || TEMPO_PADRAO;
     const percentagem = Math.max(0, Math.min(100, (estado.tempoRestante / total) * 100));
@@ -72,7 +86,7 @@ function atualizarInterface() {
 
         const botoesAcao = (jogador.status === 'ativo' && estado.tempoRestante > 0) 
             ? `<div class="acoes-jogador">
-                <button class="btn-regra" onclick="registrarInfracao(${index})">🔒 Mexeu / Bloquear</button>
+                <button class="btn-regra" onclick="registrarInfracao(${index})">🔒 Mexeu</button>
                </div>` 
             : '';
 
@@ -125,9 +139,6 @@ function iniciarCronometro() {
 
 function iniciarDesafio() {
     ativarEcraInteiro();
-    if (!estado.emAndamento && estado.tempoRestante === TEMPO_PADRAO) {
-        estado.tempoTotal = TEMPO_PADRAO;
-    }
     estado.emAndamento = true;
     salvarEstado();
     atualizarInterface();
@@ -137,6 +148,7 @@ function iniciarDesafio() {
 function ativarModoTeste() {
     estado.tempoTotal = 10;
     estado.tempoRestante = 10;
+    fecharMenuAdmin();
     iniciarDesafio();
 }
 
@@ -198,12 +210,12 @@ function reiniciarTudo() {
             bloqueioAtivo: null
         };
         salvarEstado();
+        fecharMenuAdmin();
         atualizarInterface();
         iniciarCronometro();
     }
 }
 
-// DETEÇÃO AUTOMÁTICA DE SAÍDA OU BLOQUEIO DE ECRÃ
 document.addEventListener("visibilitychange", () => {
     if (document.hidden && estado.emAndamento && !estado.bloqueioAtivo) {
         estado.emAndamento = false;
@@ -216,14 +228,12 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
-// Tenta ativar ecrã inteiro no primeiro toque no ecrã
 document.addEventListener("click", () => {
     if (estado.emAndamento && !document.fullscreenElement) {
         ativarEcraInteiro();
     }
 }, { once: true });
 
-// ARRANQUE AUTOMÁTICO ASSIM QUE O LINK ABRE
 if (estado.bloqueioAtivo) {
     abrirTelaPenalizacao(estado.bloqueioAtivo.nome, estado.bloqueioAtivo.motivo);
 } else if (estado.emAndamento && estado.tempoRestante > 0) {
