@@ -7,10 +7,26 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- ECRÃ DE ENTRADA OBRIGATÓRIA (VINCULA AO NÚMERO NA NUVEM) -->
+    <div id="tela-entrada" class="tela-preta" style="height: 100vh; border: none; z-index: 9998;">
+        <div class="caixa-cobranca" style="border-color: #38bdf8; box-shadow: 0 0 40px rgba(56, 189, 248, 0.2);">
+            <div class="badge-oficial">IDENTIFICAÇÃO OFICIAL</div>
+            <h2 style="color: #ffffff; margin-bottom: 8px;">📵 DESAFIO 6 HORAS</h2>
+            <p class="motivo-texto">Insere os teus dados para entrar na disputa pelo Apple iPhone 14. O teu progresso e regras ficam gravados na nuvem.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+                <input type="text" id="login-nome" placeholder="Teu Nome Completo...">
+                <input type="tel" id="login-telefone" placeholder="Teu Número de Telemóvel (ex: 923000000)...">
+            </div>
+
+            <button id="btn-entrar-jogo" class="btn-primario" style="width: 100%; padding: 14px; font-size: 1rem;">🚀 Entrar e Iniciar Contagem</button>
+        </div>
+    </div>
+
     <div class="container">
         <header style="position: relative;">
-            <button onclick="abrirMenuAdmin()" style="position: absolute; top: 0; right: 0; background: transparent; color: #475569; padding: 4px 8px; font-size: 0.75rem; border: 1px solid #1e293b;" title="Acesso Administrador">⚙️ Admin</button>
-            <div class="badge-oficial">TORNEIO OFICIAL • EDIÇÃO ESPECIAL</div>
+            <button id="btn-abrir-admin" style="position: absolute; top: 0; right: 0; background: transparent; color: #475569; padding: 4px 8px; font-size: 0.75rem; border: 1px solid #1e293b;">⚙️ Admin</button>
+            <div class="badge-oficial">TORNEIO OFICIAL • NUVEM ATIVA</div>
             <h1>📵 DESAFIO 6 HORAS</h1>
             <p class="regras">Resiste 6 horas sem tocar ou sair desta tela para conquistar o grande prémio.</p>
         </header>
@@ -56,29 +72,22 @@
                 <div id="barra-progresso" class="barra-progresso-fill"></div>
             </div>
             
-            <!-- BOTÕES ESCONDIDOS (SÓ APARECEM COM O PIN ADMIN) -->
             <div id="controles-admin" class="botoes-tempo escondido" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #334155;">
-                <button id="btn-teste" onclick="ativarModoTeste()" class="btn-secundario">⚡ Teste (10s)</button>
-                <button id="btn-reset" onclick="reiniciarTudo()" class="btn-perigo">🔄 Reiniciar 6H</button>
-                <button onclick="fecharMenuAdmin()" class="btn-secundario">✖ Fechar</button>
+                <button id="btn-teste" class="btn-secundario">⚡ Teste (10s)</button>
+                <button id="btn-reset" class="btn-perigo">🔄 Reiniciar 6H</button>
+                <button id="btn-fechar-admin" class="btn-secundario">✖ Fechar</button>
             </div>
         </section>
 
-        <!-- REGISTO DE PARTICIPANTES (TAMBÉM PROTEGIDO NO PAINEL ADMIN) -->
-        <section id="cadastro-admin" class="cadastro escondido">
-            <input type="text" id="input-nome" placeholder="Nome do participante..." onkeypress="if(event.key==='Enter') adicionarJogador()">
-            <button onclick="adicionarJogador()" class="btn-primario">+ Entrar</button>
-        </section>
-
         <div class="cabecalho-lista">
-            <span>PARTICIPANTES NA DISPUTA</span>
-            <span>EM PROVA: <strong id="total-ativos">0</strong></span>
+            <span>JOGADOR REGISTADO</span>
+            <span>ESTADO: <strong id="status-nuvem">ONLINE</strong></span>
         </div>
 
         <ul id="lista-jogadores"></ul>
     </div>
 
-    <!-- ECRÃ PRETO DE BLOQUEIO (DESBLOQUEIO = 5.000 KZ) -->
+    <!-- METADE DO ECRÃ PRETO DE BLOQUEIO (DESBLOQUEIO = 5.000 KZ) -->
     <div id="tela-penalizacao" class="tela-preta escondido">
         <div class="caixa-cobranca">
             <div class="icone-alerta">🔒</div>
@@ -96,7 +105,7 @@
                     <label>TRANSFERIR 5.000 KZ PARA O IBAN:</label>
                     <div class="copiar-linha">
                         <code id="texto-iban">AO06 0055 0000 0518 0413 1015 6</code>
-                        <button onclick="copiarTexto('texto-iban')">Copiar</button>
+                        <button id="btn-copiar-iban">Copiar</button>
                     </div>
                 </div>
 
@@ -104,18 +113,18 @@
                     <label>ENVIAR COMPROVATIVO PARA O GMAIL:</label>
                     <div class="copiar-linha">
                         <code id="texto-gmail">andersonemilio55@gmail.com</code>
-                        <button onclick="copiarTexto('texto-gmail')">Copiar</button>
+                        <button id="btn-copiar-gmail">Copiar</button>
                     </div>
                 </div>
             </div>
 
             <div class="desbloqueio-admin">
                 <input type="password" id="input-pin-admin" placeholder="PIN do Administrador..." maxlength="6">
-                <button onclick="desbloquearComPin()" class="btn-desbloquear">🔓 Desbloquear</button>
+                <button id="btn-desbloquear" class="btn-desbloquear">🔓 Desbloquear</button>
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>

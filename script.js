@@ -1,62 +1,79 @@
-const PIN_ADMIN = "2026";
-const TEMPO_PADRAO = 6 * 3600;
+import { initializeApp } from "https://gstatic.com";
+import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://gstatic.com";
 
-let estado = JSON.parse(localStorage.getItem('desafio6h_dados')) || {
-    tempoRestante: TEMPO_PADRAO,
-    tempoTotal: TEMPO_PADRAO,
-    emAndamento: true,
-    jogadores: new Array({
-        nome: "Participante Oficial",
-        status: "ativo",
-        horaFalha: null,
-        motivo: ""
-    }),
-    bloqueioAtivo: null
+const firebaseConfig = {
+  apiKey: "AIzaSyDDpAaWpthdTmoE64ZrmF-t8f6FF6rdMH0",
+  authDomain: "://firebaseapp.com",
+  databaseURL: "https://firebasedatabase.app",
+  projectId: "desafio-6h-928fb",
+  storageBucket: "desafio-6h-928fb.firebasestorage.app",
+  messagingSenderId: "719371529545",
+  appId: "1:719371529545:web:2871006770c473818b7e98"
 };
 
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const PIN_ADMIN = "2026";
+const TEMPO_PADRAO = 21600;
+
+let jogadorAtual = null;
 let intervalo = null;
 
-function salvarEstado() {
-    localStorage.setItem('desafio6h_dados', JSON.stringify(estado));
-}
-
 function formatarTempo(segundos) {
-    const h = Math.floor(segundos / 3600);
-    const m = Math.floor((segundos % 3600) / 60);
-    const s = segundos % 60;
-    return [h, m, s].map(v => String(v).padStart(2, '0')).join(':');
+    const h = String(Math.floor(segundos / 3600)).padStart(2, '0');
+    const m = String(Math.floor((segundos % 3600) / 60)).padStart(2, '0');
+    const s = String(segundos % 60).padStart(2, '0');
+    return h + ":" + m + ":" + s;
 }
 
 function ativarEcraInteiro() {
     const elem = document.documentElement;
     if (elem.requestFullscreen) {
         elem.requestFullscreen().catch(() => {});
-    } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen();
     }
 }
 
-function abrirMenuAdmin() {
-    if (estado.bloqueioAtivo) return;
-    const pin = prompt("Insere o PIN de Administrador para aceder aos controlos:");
-    if (pin === PIN_ADMIN) {
-        document.getElementById('controles-admin').classList.remove('escondido');
-        document.getElementById('cadastro-admin').classList.remove('escondido');
-    } else if (pin !== null) {
-        alert("❌ Acesso negado! PIN incorreto.");
-    }
-}
+async function sincronizarComNuvem(telefone, nomeInicial) {
+    const telLimpo = telefone.replace(/\D/g, '');
+    const docRef = doc(db, "participantes", telLimpo);
+    const docSnap = await getDoc(docRef);
 
-function fecharMenuAdmin() {
-    document.getElementById('controles-admin').classList.add('escondido');
-    document.getElementById('cadastro-admin').classList.add('escondido');
+    if (docSnap.exists()) {
+        jogadorAtual = docSnap.data();
+    } else {
+        jogadorAtual = {
+            telefone: telLimpo,
+            nome: nomeInicial,
+            tempoRestante: TEMPO_PADRAO,
+            tempoTotal: TEMPO_PADRAO,
+            emAndamento: true,
+            bloqueado: false,
+            motivo: "",
+            horaFalha: ""
+        };
+        await setDoc(docRef, jogadorAtual);
+    }
+
+    document.cookie = "desafio_tel=" + telLimpo + "; max-age=86400; path=/";
+    document.getElementById('tela-entrada').classList.add('escondido');
+    
+    if (jogadorAtual.bloqueado) {
+        exibirBloqueio(jogadorAtual.nome, jogadorAtual.motivo);
+    } else if (jogadorAtual.emAndamento && jogadorAtual.tempoRestante > 0) {
+        iniciarCronometro();
+    }
+    
+    atualizarInterface();
 }
 
 function atualizarInterface() {
-    document.getElementById('cronometro').textContent = formatarTempo(estado.tempoRestante);
+    if (!jogadorAtual) return;
 
-    const total = estado.tempoTotal || TEMPO_PADRAO;
-    const percentagem = Math.max(0, Math.min(100, (estado.tempoRestante / total) * 100));
+    document.getElementById('cronometro').textContent = formatarTempo(jogadorAtual.tempoRestante);
+
+    const total = jogadorAtual.tempoTotal || TEMPO_PADRAO;
+    const percentagem = Math.max(0, Math.min(100, (jogadorAtual.tempoRestante / total) * 100));
     const barra = document.getElementById('barra-progresso');
     if (barra) {
         barra.style.width = percentagem + '%';
@@ -65,203 +82,201 @@ function atualizarInterface() {
     const lista = document.getElementById('lista-jogadores');
     lista.innerHTML = '';
 
-    let ativos = 0;
+    const li = document.createElement('li');
+    if (jogadorAtual.bloqueado) {
+        li.className = 'banido';
+    }
 
-    estado.jogadores.forEach((jogador, index) => {
-        if (jogador.status === 'ativo') {
-            ativos++;
-        }
+    let textoStatus = '';
+    if (!jogadorAtual.bloqueado) {
+        textoStatus = jogadorAtual.tempoRestante === 0 
+            ? '🏆 VENCEDOR OFICIAL DO IPHONE 14!' 
+            : '🟢 Ligado à Nuvem (' + jogadorAtual.telefone + ') — Não saias!';
+    } else {
+        textoStatus = '🔒 Bloqueado na Nuvem (' + jogadorAtual.motivo + ') às ' + jogadorAtual.horaFalha;
+    }
 
-        const li = document.createElement('li');
-        if (jogador.status === 'banido') li.className = 'banido';
+    const botaoAcao = (!jogadorAtual.bloqueado && jogadorAtual.tempoRestante > 0)
+        ? '<button id="btn-mexeu-manual" class="btn-regra">🔒 Mexeu</button>'
+        : '';
 
-        let textoStatus = '';
-        if (jogador.status === 'ativo') {
-            textoStatus = estado.tempoRestante === 0 
-                ? `🏆 VENCEDOR OFICIAL DO IPHONE 14!` 
-                : `🟢 Desafio ativo — Não saias desta tela!`;
-        } else if (jogador.status === 'banido') {
-            textoStatus = `🔒 Bloqueado (${jogador.motivo}) às ${jogador.horaFalha}`;
-        }
+    li.innerHTML = '<div class="info-jogador"><strong>' + jogadorAtual.nome + '</strong><small>' + textoStatus + '</small></div>' + botaoAcao;
+    lista.appendChild(li);
 
-        const botoesAcao = (jogador.status === 'ativo' && estado.tempoRestante > 0 && !estado.bloqueioAtivo) 
-            ? `<div class="acoes-jogador">
-                <button class="btn-regra" onclick="registrarInfracao(${index})">🔒 Mexeu</button>
-               </div>` 
-            : '';
-
-        li.innerHTML = `
-            <div class="info-jogador">
-                <strong>${jogador.nome}</strong>
-                <small>${textoStatus}</small>
-            </div>
-            ${botoesAcao}
-        `;
-        lista.appendChild(li);
-    });
-
-    document.getElementById('total-ativos').textContent = ativos;
+    const btnMexeu = document.getElementById('btn-mexeu-manual');
+    if (btnMexeu) {
+        btnMexeu.onclick = () => dispararBloqueioNuvem("Mexeu no telemóvel");
+    }
 }
 
-function adicionarJogador() {
-    const input = document.getElementById('input-nome');
-    const nome = input.value.trim();
-    if (!nome) return;
+async function dispararBloqueioNuvem(motivo) {
+    if (!jogadorAtual || jogadorAtual.bloqueado) return;
 
-    estado.jogadores.push({
-        nome: nome,
-        status: 'ativo',
-        horaFalha: null,
-        motivo: ''
-    });
-
-    input.value = '';
-    salvarEstado();
-    atualizarInterface();
-}
-
-function iniciarCronometro() {
     clearInterval(intervalo);
-    intervalo = setInterval(() => {
-        if (estado.tempoRestante > 0) {
-            estado.tempoRestante--;
-            salvarEstado();
-            atualizarInterface();
-        } else {
-            clearInterval(intervalo);
-            estado.emAndamento = false;
-            salvarEstado();
-            atualizarInterface();
-            alert('🎉 TEMPO ESGOTADO! Parabéns pelo Apple iPhone 14!');
-        }
-    }, 1000);
-}
+    jogadorAtual.emAndamento = false;
+    jogadorAtual.bloqueado = true;
+    jogadorAtual.motivo = motivo;
+    jogadorAtual.horaFalha = formatarTempo(jogadorAtual.tempoRestante);
 
-function iniciarDesafio() {
-    ativarEcraInteiro();
-    estado.emAndamento = true;
-    salvarEstado();
+    exibirBloqueio(jogadorAtual.nome, motivo);
     atualizarInterface();
-    iniciarCronometro();
+
+    const docRef = doc(db, "participantes", jogadorAtual.telefone);
+    await updateDoc(docRef, {
+        emAndamento: false,
+        bloqueado: true,
+        motivo: motivo,
+        horaFalha: jogadorAtual.horaFalha,
+        tempoRestante: jogadorAtual.tempoRestante
+    });
 }
 
-function ativarModoTeste() {
-    estado.tempoTotal = 10;
-    estado.tempoRestante = 10;
-    fecharMenuAdmin();
-    iniciarDesafio();
-}
-
-function registrarInfracao(index) {
-    const jogador = estado.jogadores[index];
-    jogador.status = 'banido';
-    jogador.motivo = 'Mexeu no telemóvel / Quebrou a regra';
-    jogador.horaFalha = formatarTempo(estado.tempoRestante);
-    
-    estado.emAndamento = false;
-    clearInterval(intervalo);
-    
-    salvarEstado();
-    atualizarInterface();
-    abrirTelaPenalizacao(jogador.nome, jogador.motivo);
-}
-
-function abrirTelaPenalizacao(nome, motivo) {
-    estado.bloqueioAtivo = { nome: nome, motivo: motivo };
-    salvarEstado();
-
+function exibirBloqueio(nome, motivo) {
     document.body.classList.add('bloqueado-ativo');
-    document.getElementById('texto-infrator').textContent = `Infrator: ${nome}`;
-    document.getElementById('motivo-infrator').textContent = `Motivo: ${motivo}`;
+    document.getElementById('texto-infrator').textContent = 'Infrator: ' + nome + ' (' + jogadorAtual.telefone + ')';
+    document.getElementById('motivo-infrator').textContent = 'Motivo: ' + motivo;
     document.getElementById('input-pin-admin').value = '';
     document.getElementById('tela-penalizacao').classList.remove('escondido');
 }
 
-function desbloquearComPin() {
+function iniciarCronometro() {
+    clearInterval(intervalo);
+    let contadorSync = 0;
+
+    intervalo = setInterval(async () => {
+        if (jogadorAtual.tempoRestante > 0 && !jogadorAtual.bloqueado) {
+            jogadorAtual.tempoRestante--;
+            atualizarInterface();
+
+            contadorSync++;
+            if (contadorSync >= 10) {
+                contadorSync = 0;
+                const docRef = doc(db, "participantes", jogadorAtual.telefone);
+                updateDoc(docRef, { tempoRestante: jogadorAtual.tempoRestante }).catch(() => {});
+            }
+        } else {
+            clearInterval(intervalo);
+            if (jogadorAtual.tempoRestante === 0 && !jogadorAtual.bloqueado) {
+                jogadorAtual.emAndamento = false;
+                const docRef = doc(db, "participantes", jogadorAtual.telefone);
+                await updateDoc(docRef, { tempoRestante: 0, emAndamento: false });
+                atualizarInterface();
+                alert('🎉 TEMPO ESGOTADO! Parabéns pelo Apple iPhone 14!');
+            }
+        }
+    }, 1000);
+}
+
+document.getElementById('btn-entrar-jogo').onclick = async () => {
+    const nome = document.getElementById('login-nome').value.trim();
+    const telefone = document.getElementById('login-telefone').value.trim();
+
+    if (!nome || telefone.length < 9) {
+        alert("Insere o teu Nome e um Número de Telemóvel válido (9 dígitos)!");
+        return;
+    }
+
+    document.getElementById('btn-entrar-jogo').textContent = "A verificar na nuvem...";
+    ativarEcraInteiro();
+    await sincronizarComNuvem(telefone, nome);
+};
+
+document.getElementById('btn-desbloquear').onclick = async () => {
     const pinDigitado = document.getElementById('input-pin-admin').value;
     
     if (pinDigitado === PIN_ADMIN) {
-        estado.bloqueioAtivo = null;
-        salvarEstado();
+        jogadorAtual.bloqueado = false;
+        jogadorAtual.motivo = "";
+        
+        const docRef = doc(db, "participantes", jogadorAtual.telefone);
+        await updateDoc(docRef, {
+            bloqueado: false,
+            motivo: ""
+        });
+
         document.body.classList.remove('bloqueado-ativo');
         document.getElementById('tela-penalizacao').classList.add('escondido');
         atualizarInterface();
-        alert('✅ Pagamento de 5.000 Kz confirmado! Ecrã desbloqueado.');
+        alert('✅ Pagamento de 5.000 Kz confirmado na Nuvem! Ecrã desbloqueado.');
     } else {
         alert('❌ PIN incorreto! Transfere os 5.000 Kz e envia o comprovativo para andersonemilio55@gmail.com.');
         document.getElementById('input-pin-admin').value = '';
     }
-}
+};
 
-function copiarTexto(idElemento) {
-    const texto = document.getElementById(idElemento).textContent;
-    navigator.clipboard.writeText(texto).then(() => {
-        alert('Copiado: ' + texto);
+document.getElementById('btn-abrir-admin').onclick = () => {
+    if (jogadorAtual && jogadorAtual.bloqueado) return;
+    const pin = prompt("PIN de Administrador:");
+    if (pin === PIN_ADMIN) {
+        document.getElementById('controles-admin').classList.remove('escondido');
+    } else if (pin !== null) {
+        alert("❌ PIN incorreto.");
+    }
+};
+
+document.getElementById('btn-fechar-admin').onclick = () => {
+    document.getElementById('controles-admin').classList.add('escondido');
+};
+
+document.getElementById('btn-teste').onclick = async () => {
+    if (!jogadorAtual) return;
+    jogadorAtual.tempoTotal = 10;
+    jogadorAtual.tempoRestante = 10;
+    jogadorAtual.emAndamento = true;
+    jogadorAtual.bloqueado = false;
+    
+    const docRef = doc(db, "participantes", jogadorAtual.telefone);
+    await updateDoc(docRef, { 
+        tempoTotal: 10, 
+        tempoRestante: 10, 
+        emAndamento: true, 
+        bloqueado: false 
     });
-}
-
-function reiniciarTudo() {
-    if (confirm('Tens a certeza que queres reiniciar a contagem para 6 horas?')) {
-        clearInterval(intervalo);
-        estado = {
-            tempoRestante: TEMPO_PADRAO,
-            tempoTotal: TEMPO_PADRAO,
-            emAndamento: true,
-            jogadores: new Array({
-                nome: "Participante Oficial",
-                status: "ativo",
-                horaFalha: null,
-                motivo: ""
-            }),
-            bloqueioAtivo: null
-        };
-        document.body.classList.remove('bloqueado-ativo');
-        document.getElementById('tela-penalizacao').classList.add('escondido');
-        salvarEstado();
-        fecharMenuAdmin();
-        atualizarInterface();
-        iniciarCronometro();
-    }
-}
-
-// VIGILÂNCIA 1: MUDAR DE SEPARADOR, MINIMIZAR OU BLOQUEAR ECRÃ
-document.addEventListener("visibilitychange", () => {
-    if (document.hidden && estado.emAndamento && !estado.bloqueioAtivo) {
-        estado.emAndamento = false;
-        clearInterval(intervalo);
-        
-        abrirTelaPenalizacao(
-            "Participante Oficial", 
-            "Saiu da página ou bloqueou o ecrã durante o desafio!"
-        );
-    }
-});
-
-// VIGILÂNCIA 2: FECHAR O NAVEGADOR OU SEPARADOR
-window.addEventListener("pagehide", () => {
-    if (estado.emAndamento && !estado.bloqueioAtivo) {
-        estado.emAndamento = false;
-        estado.bloqueioAtivo = {
-            nome: "Participante Oficial",
-            motivo: "Fechou o navegador ou saiu do link durante o desafio!"
-        };
-        salvarEstado();
-    }
-});
-
-// ATIVA ECRÃ INTEIRO NO PRIMEIRO TOQUE
-document.addEventListener("click", () => {
-    if (estado.emAndamento && !document.fullscreenElement && !estado.bloqueioAtivo) {
-        ativarEcraInteiro();
-    }
-}, { once: true });
-
-// RECUPERA BLOQUEIO OU CONTINUA CONTAGEM AO ABRIR O LINK
-if (estado.bloqueioAtivo) {
-    abrirTelaPenalizacao(estado.bloqueioAtivo.nome, estado.bloqueioAtivo.motivo);
-} else if (estado.emAndamento && estado.tempoRestante > 0) {
-    salvarEstado();
+    
+    document.getElementById('controles-admin').classList.add('escondido');
     iniciarCronometro();
-}
+    atualizarInterface();
+};
 
-atualizarInterface();
+document.getElementById('btn-reset').onclick = async () => {
+    if (!jogadorAtual) return;
+    if (confirm("Reiniciar contagem para 6 horas na nuvem?")) {
+        jogadorAtual.tempoTotal = TEMPO_PADRAO;
+        jogadorAtual.tempoRestante = TEMPO_PADRAO;
+        jogadorAtual.emAndamento = true;
+        jogadorAtual.bloqueado = false;
+        
+        const docRef = doc(db, "participantes", jogadorAtual.telefone);
+        await updateDoc(docRef, { 
+            tempoTotal: TEMPO_PADRAO, 
+            tempoRestante: TEMPO_PADRAO, 
+            emAndamento: true, 
+            bloqueado: false 
+        });
+        
+        document.getElementById('controles-admin').classList.add('escondido');
+        iniciarCronometro();
+        atualizarInterface();
+    }
+};
+
+document.getElementById('btn-copiar-iban').onclick = () => {
+    const texto = document.getElementById('texto-iban').textContent;
+    navigator.clipboard.writeText(texto).then(() => {
+        alert('IBAN Copiado: ' + texto);
+    });
+};
+
+document.getElementById('btn-copiar-gmail').onclick = () => {
+    const texto = document.getElementById('texto-gmail').textContent;
+    navigator.clipboard.writeText(texto).then(() => {
+        alert('Gmail Copiado: ' + texto);
+    });
+};
+
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden && jogadorAtual && jogadorAtual.emAndamento && !jogadorAtual.bloqueado) {
+        dispararBloqueioNuvem("Saiu do navegador ou bloqueou o ecrã!");
+    }
+});
+
