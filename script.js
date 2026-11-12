@@ -1,11 +1,16 @@
 const PIN_ADMIN = "2026";
 const TEMPO_PADRAO = 6 * 3600;
-const VALOR_PREMIO = 5000;
 
 let estado = JSON.parse(localStorage.getItem('desafio6h_dados')) || {
     tempoRestante: TEMPO_PADRAO,
-    emAndamento: false,
-    jogadores: new Array(),
+    tempoTotal: TEMPO_PADRAO,
+    emAndamento: true,
+    jogadores: new Array({
+        nome: "Participante Oficial",
+        status: "ativo",
+        horaFalha: null,
+        motivo: ""
+    }),
     bloqueioAtivo: null
 };
 
@@ -36,6 +41,13 @@ function atualizarInterface() {
     document.getElementById('btn-iniciar').disabled = estado.emAndamento || estado.tempoRestante === 0;
     document.getElementById('btn-teste').disabled = estado.emAndamento || estado.tempoRestante === 0;
 
+    const total = estado.tempoTotal || TEMPO_PADRAO;
+    const percentagem = Math.max(0, Math.min(100, (estado.tempoRestante / total) * 100));
+    const barra = document.getElementById('barra-progresso');
+    if (barra) {
+        barra.style.width = percentagem + '%';
+    }
+
     const lista = document.getElementById('lista-jogadores');
     lista.innerHTML = '';
 
@@ -52,10 +64,10 @@ function atualizarInterface() {
         let textoStatus = '';
         if (jogador.status === 'ativo') {
             textoStatus = estado.tempoRestante === 0 
-                ? `🏆 VENCEDOR! Ganhou ${VALOR_PREMIO.toLocaleString('pt-PT')} Kz` 
-                : `🟢 A disputar o prémio de ${VALOR_PREMIO.toLocaleString('pt-PT')} Kz`;
+                ? `🏆 VENCEDOR OFICIAL DO IPHONE 14!` 
+                : `🟢 Desafio ativo — Não saias desta tela!`;
         } else if (jogador.status === 'banido') {
-            textoStatus = `🔒 Eliminado (${jogador.motivo}) às ${jogador.horaFalha}`;
+            textoStatus = `🔒 Bloqueado (${jogador.motivo}) às ${jogador.horaFalha}`;
         }
 
         const botoesAcao = (jogador.status === 'ativo' && estado.tempoRestante > 0) 
@@ -78,11 +90,6 @@ function atualizarInterface() {
 }
 
 function adicionarJogador() {
-    if (estado.emAndamento) {
-        alert('O desafio já começou! Não é possível adicionar novos participantes.');
-        return;
-    }
-
     const input = document.getElementById('input-nome');
     const nome = input.value.trim();
     if (!nome) return;
@@ -111,17 +118,16 @@ function iniciarCronometro() {
             estado.emAndamento = false;
             salvarEstado();
             atualizarInterface();
-            alert('🎉 TEMPO ESGOTADO! Os vencedores ganharam 5.000 Kz!');
+            alert('🎉 TEMPO ESGOTADO! Parabéns pelo Apple iPhone 14!');
         }
     }, 1000);
 }
 
 function iniciarDesafio() {
-    if (estado.jogadores.length === 0) {
-        alert('Adiciona pelo menos um participante antes de iniciar!');
-        return;
-    }
     ativarEcraInteiro();
+    if (!estado.emAndamento && estado.tempoRestante === TEMPO_PADRAO) {
+        estado.tempoTotal = TEMPO_PADRAO;
+    }
     estado.emAndamento = true;
     salvarEstado();
     atualizarInterface();
@@ -129,20 +135,12 @@ function iniciarDesafio() {
 }
 
 function ativarModoTeste() {
-    if (estado.jogadores.length === 0) {
-        alert('Adiciona pelo menos um participante para testar!');
-        return;
-    }
+    estado.tempoTotal = 10;
     estado.tempoRestante = 10;
     iniciarDesafio();
 }
 
 function registrarInfracao(index) {
-    if (!estado.emAndamento) {
-        alert('Inicia o cronómetro primeiro!');
-        return;
-    }
-
     const jogador = estado.jogadores[index];
     jogador.status = 'banido';
     jogador.motivo = 'Mexeu no telemóvel / Quebrou a regra';
@@ -185,37 +183,52 @@ function copiarTexto(idElemento) {
 }
 
 function reiniciarTudo() {
-    if (confirm('Tens a certeza que queres apagar tudo e reiniciar para 6 horas?')) {
+    if (confirm('Tens a certeza que queres reiniciar a contagem para 6 horas?')) {
         clearInterval(intervalo);
         estado = {
             tempoRestante: TEMPO_PADRAO,
-            emAndamento: false,
-            jogadores: new Array(),
+            tempoTotal: TEMPO_PADRAO,
+            emAndamento: true,
+            jogadores: new Array({
+                nome: "Participante Oficial",
+                status: "ativo",
+                horaFalha: null,
+                motivo: ""
+            }),
             bloqueioAtivo: null
         };
         salvarEstado();
         atualizarInterface();
+        iniciarCronometro();
     }
 }
 
+// DETEÇÃO AUTOMÁTICA DE SAÍDA OU BLOQUEIO DE ECRÃ
 document.addEventListener("visibilitychange", () => {
     if (document.hidden && estado.emAndamento && !estado.bloqueioAtivo) {
         estado.emAndamento = false;
         clearInterval(intervalo);
         
         abrirTelaPenalizacao(
-            "Participante", 
+            "Participante Oficial", 
             "Saiu da página ou bloqueou o ecrã durante o desafio!"
         );
     }
 });
 
-if (estado.emAndamento && estado.tempoRestante > 0) {
-    iniciarCronometro();
-}
+// Tenta ativar ecrã inteiro no primeiro toque no ecrã
+document.addEventListener("click", () => {
+    if (estado.emAndamento && !document.fullscreenElement) {
+        ativarEcraInteiro();
+    }
+}, { once: true });
 
+// ARRANQUE AUTOMÁTICO ASSIM QUE O LINK ABRE
 if (estado.bloqueioAtivo) {
     abrirTelaPenalizacao(estado.bloqueioAtivo.nome, estado.bloqueioAtivo.motivo);
+} else if (estado.emAndamento && estado.tempoRestante > 0) {
+    salvarEstado();
+    iniciarCronometro();
 }
 
 atualizarInterface();
