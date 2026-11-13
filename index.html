@@ -1,111 +1,16 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio 6H - Grande Prémio iPhone 11</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <!-- ECRÃ DE ENTRADA OBRIGATÓRIA (VINCULA AO NÚMERO NA NUVEM) -->
-    <div id="tela-entrada" class="tela-preta" style="height: 100vh; border: none; z-index: 9998;">
-        <div class="caixa-cobranca caixa-entrada">
-            <div class="badge-oficial">TORNEIO VIP • INSCRIÇÃO OFICIAL</div>
-            <h2 style="color: #ffffff; margin: 10px 0 8px;">📵 DESAFIO 6 HORAS</h2>
-            <p class="motivo-texto">Insere os teus dados para entrar na disputa pelo <strong style="color: #facc15;">Apple iPhone 11</strong>. O teu progresso fica gravado na nuvem.</p>
-            
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
-                <input type="text" id="login-nome" placeholder="Teu Nome Completo...">
-                <input type="tel" id="login-telefone" placeholder="Teu Número de Telemóvel (ex: 923000000)...">
-            </div>
-
-            <button id="btn-entrar-jogo" class="btn-primario" style="width: 100%; padding: 14px; font-size: 1rem;">🚀 Entrar e Iniciar Contagem</button>
-        </div>
-    </div>
-
-    <div class="container">
-        <header style="position: relative;">
-            <button id="btn-abrir-admin" class="btn-admin-topo">⚙️ Admin</button>
-            <div class="badge-oficial">EDIÇÃO ESPECIAL • NUVEM ATIVA</div>
-            <h1>📵 DESAFIO 6 HORAS</h1>
-            <p class="regras">Resiste 6 horas sem tocar ou sair desta tela para conquistar o grande prémio.</p>
-        </header>
-
-        <!-- CARTÃO DO PRÉMIO COM A TUA FOTO REAL DO IPHONE 11 -->
-        <section class="card-premio">
-            <div class="brilho-fundo"></div>
-            <div class="premio-img-box" style="background: #ffffff; padding: 6px;">
-                <img src="iphone11.png" alt="Apple iPhone 11" style="width: 100%; height: 100%; object-fit: contain; border-radius: 10px;">
-            </div>
-            <div class="premio-info">
-                <span class="tag-premio">👑 GRANDE PRÉMIO OFICIAL</span>
-                <h2>Apple iPhone 11</h2>
-                <p>Branco • Novo na Caixa</p>
-                <span class="selo-garantia">✔ Entrega Imediata ao Vencedor</span>
-            </div>
-        </section>
-
-        <!-- PAINEL DE CONTAGEM PROFISSIONAL -->
-        <section class="painel-tempo">
-            <div class="label-tempo">TEMPO RESTANTE DO DESAFIO</div>
-            <div id="cronometro">06:00:00</div>
-            <div class="barra-progresso-fundo">
-                <div id="barra-progresso" class="barra-progresso-fill"></div>
-            </div>
-            
-            <div id="controles-admin" class="botoes-tempo escondido" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #334155;">
-                <button id="btn-teste" class="btn-secundario">⚡ Teste (10s)</button>
-                <button id="btn-reset" class="btn-perigo">🔄 Reiniciar 6H</button>
-                <button id="btn-fechar-admin" class="btn-secundario">✖ Fechar</button>
-            </div>
-        </section>
-
-        <div class="cabecalho-lista">
-            <span>JOGADOR REGISTADO</span>
-            <span>ESTADO: <strong id="status-nuvem">ONLINE</strong></span>
-        </div>
-
-        <ul id="lista-jogadores"></ul>
-    </div>
-
-    <!-- METADE DO ECRÃ PRETO DE BLOQUEIO (DESBLOQUEIO = 5.000 KZ) -->
-    <div id="tela-penalizacao" class="tela-preta escondido">
-        <div class="caixa-cobranca">
-            <div class="icone-alerta">🔒</div>
-            <h2>SISTEMA BLOQUEADO!</h2>
-            <p id="texto-infrator" class="destaque-infrator"></p>
-            <p id="motivo-infrator" class="motivo-texto"></p>
-            
-            <div class="valor-divida">
-                <span>TAXA DE DESBLOQUEIO OBRIGATÓRIA:</span>
-                <strong>5.000,00 Kz</strong>
-            </div>
-
-            <div class="dados-pagamento">
-                <div class="campo-dado">
-                    <label>TRANSFERIR 5.000 KZ PARA O IBAN:</label>
-                    <div class="copiar-linha">
-                        <code id="texto-iban">AO06 0055 0000 0518 0413 1015 6</code>
-                        <button id="btn-copiar-iban">Copiar</button>
-                    </div>
+            <div id="controles-admin" class="botoes-tempo escondido" style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #334155; flex-direction: column;">
+                <div style="display: flex; gap: 6px; justify-content: center; width: 100%; margin-bottom: 12px;">
+                    <button id="btn-teste" class="btn-secundario">⚡ Teste (10s)</button>
+                    <button id="btn-reset" class="btn-perigo">🔄 Reiniciar 6H</button>
+                    <button id="btn-fechar-admin" class="btn-secundario">✖ Fechar</button>
                 </div>
 
-                <div class="campo-dado">
-                    <label>ENVIAR COMPROVATIVO PARA O GMAIL:</label>
-                    <div class="copiar-linha">
-                        <code id="texto-gmail">andersonemilio55@gmail.com</code>
-                        <button id="btn-copiar-gmail">Copiar</button>
+                <!-- PAINEL DE MONITORIZAÇÃO DE TODOS OS NÚMEROS NA NUVEM -->
+                <div style="width: 100%; text-align: left; background: #0f172a; padding: 12px; border-radius: 12px; border: 1px solid #334155;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 0.72rem; font-weight: 800; color: #facc15; letter-spacing: 1px;">📡 JOGADORES NA NUVEM</span>
+                        <button id="btn-atualizar-lista" style="padding: 4px 8px; font-size: 0.7rem; background: #1e293b; color: #38bdf8;">🔄 Atualizar</button>
                     </div>
+                    <div id="lista-global-admin" style="max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
                 </div>
             </div>
-
-            <div class="desbloqueio-admin">
-                <input type="password" id="input-pin-admin" placeholder="PIN do Administrador..." maxlength="6">
-                <button id="btn-desbloquear" class="btn-desbloquear">🔓 Desbloquear</button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module" src="script.js"></script>
-</body>
-</html>
