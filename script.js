@@ -1,19 +1,4 @@
-import { initializeApp } from "https://gstatic.com";
-import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://gstatic.com";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDDpAaWpthdTmoE64ZrmF-t8f6FF6rdMH0",
-  authDomain: "://firebaseapp.com",
-  databaseURL: "https://firebasedatabase.app",
-  projectId: "desafio-6h-928fb",
-  storageBucket: "desafio-6h-928fb.firebasestorage.app",
-  messagingSenderId: "719371529545",
-  appId: "1:719371529545:web:2871006770c473818b7e98"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
+const DB_URL = "https://firebasedatabase.app";
 const PIN_ADMIN = "2026";
 const TEMPO_PADRAO = 21600;
 
@@ -34,17 +19,37 @@ function ativarEcraInteiro() {
     }
 }
 
+async function lerNuvem(telefone) {
+    try {
+        const res = await fetch(DB_URL + "/" + telefone + ".json");
+        return await res.json();
+    } catch (e) {
+        return null;
+    }
+}
+
+async function gravarNuvem(telefone, dados) {
+    try {
+        await fetch(DB_URL + "/" + telefone + ".json", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dados)
+        });
+    } catch (e) {
+        console.warn("Modo offline ativo");
+    }
+}
+
 async function sincronizarComNuvem(telefone, nomeInicial) {
     const telLimpo = telefone.replace(/\D/g, '');
-    const docRef = doc(db, "participantes", telLimpo);
-    const docSnap = await getDoc(docRef);
+    const dadosExistentes = await lerNuvem(telLimpo);
 
-    if (docSnap.exists()) {
-        jogadorAtual = docSnap.data();
+    if (dadosExistentes && dadosExistentes.telefone) {
+        jogadorAtual = dadosExistentes;
     } else {
         jogadorAtual = {
             telefone: telLimpo,
-            nome: nomeInicial,
+            nome: nomeInicial || "Participante",
             tempoRestante: TEMPO_PADRAO,
             tempoTotal: TEMPO_PADRAO,
             emAndamento: true,
@@ -52,10 +57,10 @@ async function sincronizarComNuvem(telefone, nomeInicial) {
             motivo: "",
             horaFalha: ""
         };
-        await setDoc(docRef, jogadorAtual);
+        await gravarNuvem(telLimpo, jogadorAtual);
     }
 
-    document.cookie = "desafio_tel=" + telLimpo + "; max-age=86400; path=/";
+    sessionStorage.setItem('desafio_tel', telLimpo);
     document.getElementById('tela-entrada').classList.add('escondido');
     
     if (jogadorAtual.bloqueado) {
@@ -90,7 +95,7 @@ function atualizarInterface() {
     let textoStatus = '';
     if (!jogadorAtual.bloqueado) {
         textoStatus = jogadorAtual.tempoRestante === 0 
-            ? '🏆 VENCEDOR OFICIAL DO IPHONE 14!' 
+            ? '🏆 VENCEDOR OFICIAL DO APPLE IPHONE 11!' 
             : '🟢 Ligado à Nuvem (' + jogadorAtual.telefone + ') — Não saias!';
     } else {
         textoStatus = '🔒 Bloqueado na Nuvem (' + jogadorAtual.motivo + ') às ' + jogadorAtual.horaFalha;
@@ -105,7 +110,7 @@ function atualizarInterface() {
 
     const btnMexeu = document.getElementById('btn-mexeu-manual');
     if (btnMexeu) {
-        btnMexeu.onclick = () => dispararBloqueioNuvem("Mexeu no telemóvel");
+        btnMexeu.onclick = () => dispararBloqueioNuvem("Mexeu no telemóvel / Quebrou a regra");
     }
 }
 
@@ -120,15 +125,7 @@ async function dispararBloqueioNuvem(motivo) {
 
     exibirBloqueio(jogadorAtual.nome, motivo);
     atualizarInterface();
-
-    const docRef = doc(db, "participantes", jogadorAtual.telefone);
-    await updateDoc(docRef, {
-        emAndamento: false,
-        bloqueado: true,
-        motivo: motivo,
-        horaFalha: jogadorAtual.horaFalha,
-        tempoRestante: jogadorAtual.tempoRestante
-    });
+    await gravarNuvem(jogadorAtual.telefone, jogadorAtual);
 }
 
 function exibirBloqueio(nome, motivo) {
@@ -151,17 +148,15 @@ function iniciarCronometro() {
             contadorSync++;
             if (contadorSync >= 10) {
                 contadorSync = 0;
-                const docRef = doc(db, "participantes", jogadorAtual.telefone);
-                updateDoc(docRef, { tempoRestante: jogadorAtual.tempoRestante }).catch(() => {});
+                gravarNuvem(jogadorAtual.telefone, jogadorAtual);
             }
         } else {
             clearInterval(intervalo);
             if (jogadorAtual.tempoRestante === 0 && !jogadorAtual.bloqueado) {
                 jogadorAtual.emAndamento = false;
-                const docRef = doc(db, "participantes", jogadorAtual.telefone);
-                await updateDoc(docRef, { tempoRestante: 0, emAndamento: false });
+                await gravarNuvem(jogadorAtual.telefone, jogadorAtual);
                 atualizarInterface();
-                alert('🎉 TEMPO ESGOTADO! Parabéns pelo Apple iPhone 14!');
+                alert('🎉 TEMPO ESGOTADO! Parabéns pelo Apple iPhone 11!');
             }
         }
     }, 1000);
@@ -176,9 +171,15 @@ document.getElementById('btn-entrar-jogo').onclick = async () => {
         return;
     }
 
-    document.getElementById('btn-entrar-jogo').textContent = "A verificar na nuvem...";
+    const btn = document.getElementById('btn-entrar-jogo');
+    btn.textContent = "A entrar...";
+    btn.disabled = true;
+    
     ativarEcraInteiro();
     await sincronizarComNuvem(telefone, nome);
+    
+    btn.textContent = "🚀 Entrar e Iniciar Contagem";
+    btn.disabled = false;
 };
 
 document.getElementById('btn-desbloquear').onclick = async () => {
@@ -187,17 +188,12 @@ document.getElementById('btn-desbloquear').onclick = async () => {
     if (pinDigitado === PIN_ADMIN) {
         jogadorAtual.bloqueado = false;
         jogadorAtual.motivo = "";
-        
-        const docRef = doc(db, "participantes", jogadorAtual.telefone);
-        await updateDoc(docRef, {
-            bloqueado: false,
-            motivo: ""
-        });
+        await gravarNuvem(jogadorAtual.telefone, jogadorAtual);
 
         document.body.classList.remove('bloqueado-ativo');
         document.getElementById('tela-penalizacao').classList.add('escondido');
         atualizarInterface();
-        alert('✅ Pagamento de 5.000 Kz confirmado na Nuvem! Ecrã desbloqueado.');
+        alert('✅ Pagamento de 5.000 Kz confirmado! Ecrã desbloqueado.');
     } else {
         alert('❌ PIN incorreto! Transfere os 5.000 Kz e envia o comprovativo para andersonemilio55@gmail.com.');
         document.getElementById('input-pin-admin').value = '';
@@ -225,14 +221,7 @@ document.getElementById('btn-teste').onclick = async () => {
     jogadorAtual.emAndamento = true;
     jogadorAtual.bloqueado = false;
     
-    const docRef = doc(db, "participantes", jogadorAtual.telefone);
-    await updateDoc(docRef, { 
-        tempoTotal: 10, 
-        tempoRestante: 10, 
-        emAndamento: true, 
-        bloqueado: false 
-    });
-    
+    await gravarNuvem(jogadorAtual.telefone, jogadorAtual);
     document.getElementById('controles-admin').classList.add('escondido');
     iniciarCronometro();
     atualizarInterface();
@@ -240,20 +229,13 @@ document.getElementById('btn-teste').onclick = async () => {
 
 document.getElementById('btn-reset').onclick = async () => {
     if (!jogadorAtual) return;
-    if (confirm("Reiniciar contagem para 6 horas na nuvem?")) {
+    if (confirm("Reiniciar contagem para 6 horas?")) {
         jogadorAtual.tempoTotal = TEMPO_PADRAO;
         jogadorAtual.tempoRestante = TEMPO_PADRAO;
         jogadorAtual.emAndamento = true;
         jogadorAtual.bloqueado = false;
         
-        const docRef = doc(db, "participantes", jogadorAtual.telefone);
-        await updateDoc(docRef, { 
-            tempoTotal: TEMPO_PADRAO, 
-            tempoRestante: TEMPO_PADRAO, 
-            emAndamento: true, 
-            bloqueado: false 
-        });
-        
+        await gravarNuvem(jogadorAtual.telefone, jogadorAtual);
         document.getElementById('controles-admin').classList.add('escondido');
         iniciarCronometro();
         atualizarInterface();
@@ -262,16 +244,12 @@ document.getElementById('btn-reset').onclick = async () => {
 
 document.getElementById('btn-copiar-iban').onclick = () => {
     const texto = document.getElementById('texto-iban').textContent;
-    navigator.clipboard.writeText(texto).then(() => {
-        alert('IBAN Copiado: ' + texto);
-    });
+    navigator.clipboard.writeText(texto).then(() => alert('IBAN Copiado: ' + texto));
 };
 
 document.getElementById('btn-copiar-gmail').onclick = () => {
     const texto = document.getElementById('texto-gmail').textContent;
-    navigator.clipboard.writeText(texto).then(() => {
-        alert('Gmail Copiado: ' + texto);
-    });
+    navigator.clipboard.writeText(texto).then(() => alert('Gmail Copiado: ' + texto));
 };
 
 document.addEventListener("visibilitychange", () => {
@@ -280,3 +258,7 @@ document.addEventListener("visibilitychange", () => {
     }
 });
 
+const telSalvo = sessionStorage.getItem('desafio_tel');
+if (telSalvo) {
+    sincronizarComNuvem(telSalvo, "");
+}
